@@ -30,11 +30,9 @@ class Matcher(object):
     def match(self, image_path, topn=5):
         features = extract.extract_features(image_path)
         img_distances = self.cos_cdist(features)
-        # getting top 5 records
         nearest_ids = np.argsort(img_distances)[:topn].tolist()
         nearest_img_paths = self.names[nearest_ids].tolist()
-
-        return nearest_img_paths, img_distances[nearest_ids].tolist()
+        return nearest_img_paths, img_distances[nearest_ids].tolist(), nearest_ids
 
 
 def show_img(path):
@@ -77,14 +75,14 @@ def run():
 
     # imgSam = '/home/ermicho/projects/python/imageExt/images/car-1.jpg'
     #print(sample[0])
-    names, match = ma.match(sample[0], topn=100)
-    print(match)
-    l = len(match) - 1
+    names, match, nearest_ids = ma.match(sample[0], topn=200)
+    print(match[199])
+    print(nearest_ids)
     img = os.path.join(images_path_training, names[0])
     #print(img)
     res = {'q' : sample[0], 'r' : img}
 
-    show_img(res)
+    #show_img(res)
 
     # for s in sample:
     #     print('Query image ==========================================')
