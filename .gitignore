@@ -1,0 +1,6 @@
+image/
+images/
+features.pickle
+data.txt
+.idea/
+__pycache__/
