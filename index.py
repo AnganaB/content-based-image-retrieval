@@ -30,7 +30,7 @@ class Matcher(object):
     def match(self, image_path, topn=5):
         features = extract.extract_features(image_path)
         img_distances = self.cos_cdist(features)
-        nearest_ids = np.argsort(img_distances)[:topn].tolist()
+        nearest_ids = np.argsort(img_distances).tolist()
         nearest_img_paths = self.names[nearest_ids].tolist()
         return nearest_img_paths, img_distances[nearest_ids].tolist(), nearest_ids
 
@@ -48,13 +48,11 @@ def show_img(path):
     cv2.waitKey()
 
 def accuracy(img_dis, indexs):
-    therashold = 0.25
     relevant_imgs = []
     i = 0
     for  val in img_dis:
-        if(val > therashold): break;
         #########################################
-        ##### (index, distance)
+        ##### (index, distance) ################
         relevant_imgs.append((indexs[i], val))
         i = i + 1
     relevant_imgs.sort()
@@ -70,7 +68,7 @@ def accuracy(img_dis, indexs):
     print("------------------------------------------------")
     for rel in relevant_imgs:
         count = count + 1
-        precision = count/rel[0]
+        precision = count/(rel[0] + 1)
         recall = count/len(relevant_imgs)
         print(f"{precision} , {recall}")
         precision_and_recall.append((precision, recall))
@@ -80,7 +78,7 @@ def accuracy(img_dis, indexs):
 
 def run():
     images_path = './image/'
-    images_path_training = './image/'
+    images_path_training = './images/'
     files = [os.path.join(images_path, p) for p in sorted(os.listdir(images_path))]
     # getting 1 random images
     sample = random.sample(files, 1)
@@ -96,9 +94,18 @@ def run():
     #print(sample[0])
     names, match, nearest_ids = ma.match(sample[0], topn=200)
 
+   ############################################################
+   ########### filter relevant matchs thrashold = 0.4 #########
+    thrashold = 0.30
+    relevant_match = list(filter(lambda x: x < thrashold, match))
+    l = len(relevant_match)
+    relevant_ids = nearest_ids[: l]
+    print(len(relevant_match))
+    print(len(relevant_ids))
     #####  ##################################
-    ######## used to calculate accuracy
-    accuracy(match, nearest_ids)
+    ######## calculate accuracy #####
+
+    accuracy(relevant_match, relevant_ids)
     img = os.path.join(images_path_training, names[0])
     #print(img)
     res = {'q' : sample[0], 'r' : img}
