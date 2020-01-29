@@ -47,16 +47,35 @@ def show_img(path):
     cv2.imshow('result images', image_result)
     cv2.waitKey()
 
-# def measure(match_scales):
-#     therashold = 0.5
-#     relevant = 0
-#     for val in match_scales:
-#         relevant = relevant + 1;
-#         if(val > therashold): break;
-#
-#     irrelevant = len(match_scales) - relevant;
-#     Precision = relevant/(relevant + irrelevant);
-#     accuracy = relevant/irrelevant;
+def accuracy(img_dis, indexs):
+    therashold = 0.25
+    relevant_imgs = []
+    i = 0
+    for  val in img_dis:
+        if(val > therashold): break;
+        #########################################
+        ##### (index, distance)
+        relevant_imgs.append((indexs[i], val))
+        i = i + 1
+    relevant_imgs.sort()
+
+    #########################################
+    ########## (PRICISION, ACCURACY) /////////
+    ######## precision = (1:num_relevant_images) ./ locations_sorted;
+    ######## recall = (1:num_relevant_images) / num_relevant_images;
+    precision_and_recall = []
+    print(len(relevant_imgs))
+    count = 0
+    print("(precision                 ,           recall)")
+    print("------------------------------------------------")
+    for rel in relevant_imgs:
+        count = count + 1
+        precision = count/rel[0]
+        recall = count/len(relevant_imgs)
+        print(f"{precision} , {recall}")
+        precision_and_recall.append((precision, recall))
+    print("-------------------------------------------------")
+    return precision_and_recall
 
 
 def run():
@@ -76,8 +95,10 @@ def run():
     # imgSam = '/home/ermicho/projects/python/imageExt/images/car-1.jpg'
     #print(sample[0])
     names, match, nearest_ids = ma.match(sample[0], topn=200)
-    print(match[199])
-    print(nearest_ids)
+
+    #####  ##################################
+    ######## used to calculate accuracy
+    accuracy(match, nearest_ids)
     img = os.path.join(images_path_training, names[0])
     #print(img)
     res = {'q' : sample[0], 'r' : img}
